@@ -5,5 +5,7 @@
   "client": [],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+  ]
 }
