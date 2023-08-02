@@ -3,7 +3,6 @@ package com.example.addon;
 import com.example.addon.commands.CommandExample;
 import com.example.addon.hud.HudExample;
 import com.example.addon.modules.DonkeyRider;
-import com.example.addon.modules.ItemFrameDupe;
 import com.mojang.logging.LogUtils;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
