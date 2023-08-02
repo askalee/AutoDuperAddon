@@ -26,7 +26,7 @@ public class Main_Addon extends MeteorAddon {
         // Modules
         Modules.get().add(new DonkeyRider());
         Modules.get().add(new ItemFrameDupe());
-        MeteorClient.EVENT_BUS.subscribe(new DonkeyRider());
+
         MeteorClient.EVENT_BUS.subscribe(new ItemFrameDupe());
 
         // Commands

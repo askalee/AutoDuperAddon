@@ -105,22 +105,19 @@ public class ItemFrameDupe extends Module {
             }
             if (itemFrame.getHeldItemStack().getCount() > 0) {
 
-                    c.interactEntity(p, itemFrame, Hand.MAIN_HAND);
+                c.interactEntity(p, itemFrame, Hand.MAIN_HAND);
 
-                    try {
-                        Thread.sleep((long) (destroyTime.get() * 0.7));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    c.attackEntity(p, itemFrame);
-                    try {
-                        Thread.sleep((long) (destroyTime.get() * 0.7));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println(itemFrame.getHeldItemStack().getCount());
-                    System.out.println(System.currentTimeMillis());
-
+                try {
+                    Thread.sleep((long) (destroyTime.get() * 0.7));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                c.attackEntity(p, itemFrame);
+                try {
+                    Thread.sleep((long) (destroyTime.get() * 0.7));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
         }

@@ -1,29 +1,41 @@
 package com.example.addon.modules;
 
 import com.example.addon.Main_Addon;
-import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.DoubleSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.commands.commands.DismountCommand;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.misc.Spam;
-import meteordevelopment.meteorclient.systems.modules.movement.EntitySpeed;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.report.ReporterEnvironment;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.passive.DonkeyEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.RandomStringUtils;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+
+import static net.minecraft.stat.StatFormatter.DECIMAL_FORMAT;
 
 public class DonkeyRider extends Module {
-    private final Module entitySpeed = new EntitySpeed();
+    private static boolean pressed = false;
+    private static Vec3d firstPos;
+    private static Vec3d finalPos;
     private final Setting<Double> yaw = settings.getDefaultGroup().add(new DoubleSetting.Builder()
         .name("Yaw")
         .description("Yaw of the player")
@@ -70,19 +82,37 @@ public class DonkeyRider extends Module {
         .sliderMax(10000)
         .build()
     );
+    private final Setting<Keybind> pause = settings.getDefaultGroup().add(new KeybindSetting.Builder()
+        .name("Pause ")
+        .description("Pauses or resumes when pressed")
+        .defaultValue(Keybind.none())
+        .build()
+    );
+    private final Setting<Boolean> AutoDisable = settings.getDefaultGroup().add(new BoolSetting.Builder()
+        .name("AutoDisable")
+        .description("Auto Disables the module when the player is not riding a donkey")
+        .defaultValue(true)
+        .build()
+    );
     Thread runThread;
-    private Vec3d firstPos;
-    private Vec3d finalPos;
     private Vec3d currentPos;
     private boolean dismounted = false;
     private boolean remounted = false;
-    private boolean yawChanged1= false;
+    private boolean yawChanged1 = false;
     private boolean yawChanged2 = false;
-
     private double YAW;
+    private boolean running = true;
 
     public DonkeyRider() {
         super(Main_Addon.CATEGORY, "DonkeyRider", "Riding the Donkey");
+    }
+
+    public static String getFirstPos() {
+        return firstPos == null ? "" : firstPos.toString();
+    }
+
+    public static String getFinalPos() {
+        return finalPos == null ? "" : finalPos.toString();
     }
 
     @Override
@@ -90,113 +120,163 @@ public class DonkeyRider extends Module {
         super.onActivate();
         if (mc.player != null)
             firstPos = mc.player.getPos();
-        if(!entitySpeed.isActive()) entitySpeed.toggle();
         start();
+    }
+
+    public boolean shouldPause() {
+        if (pause.get().isPressed())
+            pressed = !pressed;
+        return pressed;
     }
 
     @Override
     public void onDeactivate() {
         super.onDeactivate();
-        if(entitySpeed.isActive()) entitySpeed.toggle();
-        setPressed(mc.options.forwardKey, false);
         stop();
+        setPressed(mc.options.forwardKey, false);
     }
 
-    private boolean running = true;
 
-    @EventHandler
     @SuppressWarnings("all")
-    private void onTick(TickEvent.Post event) {
+    public void run() {
         if (runThread == null) {
             runThread = new Thread(() -> {
                 while (running) {
-                    double Yaw = yaw.get();
-                    YAW = Yaw;
+                    YAW = yaw.get();
                     PlayerEntity player = mc.player;
-                    if (player != null && player.getPos() != null && isActive()) {
-                        if (player.hasVehicle() && player.getVehicle() instanceof DonkeyEntity) {
-                            currentPos = player.getPos();
-                   //         System.out.println("firstPos: "+firstPos);
-                    //        System.out.println("FinalPos: "+finalPos);
-                            if (currentPos.distanceTo(firstPos) >= distance.get() && !yawChanged1) {
-                                setPressed(mc.options.forwardKey, false);
-                                try {
-                                    Thread.sleep(waitBeforeMoving.get());
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                if (yaw.get() >= 0) {
-                                    yaw.set(yaw.get() - 180);
-                                } else {
-                                    yaw.set(yaw.get() + 180);
-                                }
-
-                                YAW = yaw.get();
-                                finalPos = firstPos;
-                                firstPos = player.getPos();
-                                yaw.set(YAW);
-                                yawChanged1 = true;
-
-                            }
-                            player.setYaw((float) YAW);
-                            setPressed(mc.options.forwardKey, isActive());
-                            if (finalPos != null) {
-                                double pos = currentPos.distanceTo(finalPos);
-                                if (pos <= 5.0f && !dismounted) {
-                                    player.dismountVehicle();
-                                    ChatUtils.sendPlayerMsg(".dismount");
-                                    mc.player.sendMessage(Text.of("Sent dismounted Command"), true);
-                                    dismounted = true;
-                                    remounted = false;
-                                    yawChanged1 = false;
-                                    yawChanged2 = false;
-                                    System.out.println("Dismounted");
+                    if (player != null) {
+                        if (player.getPos() != null) {
+                            if (player.hasVehicle() && player.getVehicle() instanceof DonkeyEntity) {
+                                currentPos = player.getPos();
+                                mc.player.sendMessage(Text.of("Distance from starting position: " + DECIMAL_FORMAT.format(currentPos.distanceTo(firstPos)) + " blocks"), true);
+                                if (currentPos.distanceTo(firstPos) >= distance.get() && !yawChanged1) {
                                     setPressed(mc.options.forwardKey, false);
-                                }
-                            }
-                        } else {
-                            setPressed(mc.options.forwardKey,false);
-                            if (dismounted && remount.get()) {
-                                List<DonkeyEntity> donkeys = player.getWorld().getEntitiesByClass(DonkeyEntity.class, player.getBoundingBox().expand(5), Entity -> !Entity.hasControllingPassenger());
-                                if (!donkeys.isEmpty() && !player.hasVehicle() && !remounted && !yawChanged2) {
+                                    String AntiSpamText = "Reached!!! " + RandomStringUtils.randomAlphanumeric(11);
                                     try {
-                                        Thread.sleep((long) (RemountTime.get() * 2));
+                                        mc.player.sendMessage(Text.of("Stopping for: " + (waitBeforeMoving.get() / 1000) + "s " + "because reached: " + distance.get() + " blocks"), true);
+                                        ChatUtils.sendPlayerMsg(AntiSpamText);
+                                        Thread.sleep(waitBeforeMoving.get());
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
                                     }
-                                    //player.startRiding(donkeys.get(0));
-                                    mc.interactionManager.interactEntity(player, donkeys.get(0), Hand.MAIN_HAND);
-                                    dismounted = false;
-                                    finalPos = null;
-                                    firstPos = donkeys.get(0).getPos();
                                     if (yaw.get() >= 0) {
                                         yaw.set(yaw.get() - 180);
                                     } else {
                                         yaw.set(yaw.get() + 180);
                                     }
                                     YAW = yaw.get();
-                                    yawChanged2 = true;
-                                    remounted = true;
-                                    yawChanged1 = false;
-                                    System.out.println("Remount YAW: " + YAW);
+                                    finalPos = firstPos;
+                                    firstPos = player.getPos();
+                                    yaw.set(YAW);
+                                    yawChanged1 = true;
+                                    yawChanged2 = false;
+                                }
+                                player.setYaw((float) YAW);
+                                if (running) {
+                                    if (shouldPause())
+                                        setPressed(mc.options.forwardKey, false);
+                                    else
+                                        setPressed(mc.options.forwardKey, isActive());
+                                }
+                                if (finalPos != null) {
+                                    double pos = currentPos.distanceTo(finalPos);
+                                    if (pos <= 5.0f && !dismounted) {
+                                        player.dismountVehicle();
+                                       // ChatUtils.sendPlayerMsg(".dismount");
+                                        mc.player.sendMessage(Text.of("Dismounted Succesfully"), false);
+                                        dismounted = true;
+                                        remounted = false;
+                                        yawChanged1 = false;
+                                        yawChanged2 = false;
+                                        setPressed(mc.options.forwardKey, false);
+                                    }
+                                }
+                            } else if (dismounted) {
+                                setPressed(mc.options.forwardKey, false);
+                                if (dismounted && remount.get()) {
+                                    List<DonkeyEntity> donkeys = player.getWorld().getEntitiesByClass(DonkeyEntity.class, player.getBoundingBox().expand(5), Entity -> !Entity.hasControllingPassenger());
+                                    if (!donkeys.isEmpty() && !player.hasVehicle() && !remounted && !yawChanged2) {
+                                        try {
+                                            mc.player.sendMessage(Text.of("Stopping for: " + (RemountTime.get() / 1000) + "s " + "because dismounted"), true);
+                                            Thread.sleep((long) (RemountTime.get() * 2));
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                        mc.player.sendMessage(Text.of("Attempting to remount"), false);
+                                                if (player.distanceTo(donkeys.get(0)) > 4) {
+                                                    String xPos = DECIMAL_FORMAT.format(donkeys.get(0).getBlockPos().getX());
+                                                    String zPos = DECIMAL_FORMAT.format(donkeys.get(0).getBlockPos().getZ());
+                                                    String yPos = DECIMAL_FORMAT.format(donkeys.get(0).getBlockPos().getY());
+                                                    ChatUtils.sendPlayerMsg("#goto " + xPos + " " + yPos + " "+ zPos );
+                                                    mc.player.sendMessage(Text.of("Going near donkey for 2s"), false);
+
+                                                    try {
+                                                        Thread.sleep((long) (2000));
+                                                    } catch (InterruptedException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                                player.startRiding(donkeys.get(0));
+                                                while (!player.hasVehicle() && player.distanceTo(donkeys.get(0)) <= 4) {
+                                                    mc.interactionManager.interactEntity(player, donkeys.get(0), Hand.MAIN_HAND);
+                                                }
+                                            }
+
+
+                                        dismounted = false;
+                                        finalPos = null;
+                                        firstPos = donkeys.get(0).getPos();
+                                        if (yaw.get() >= 0) {
+                                            yaw.set(yaw.get() - 180);
+                                        } else {
+                                            yaw.set(yaw.get() + 180);
+                                        }
+                                        YAW = yaw.get();
+                                        yawChanged2 = true;
+                                        remounted = true;
+                                        mc.player.sendMessage(Text.of("Remount Successfull"), false);
+                                        yawChanged1 = false;
+                                    }
                                 }
                             }
+                            else {
+                                if (AutoDisable.get() && !dismounted)
+                                    this.toggle();
+                            }
+
                         }
                     }
-                }
             });
+            runThread.setName("Donkey Rider Thread");
             runThread.start();
         }
-        if(mc.player==null && this.isActive())
-            this.toggle();
     }
+
     public void stop() {
+        if (runThread != null && runThread.isAlive()) {
+            runThread.interrupt();
+        }
+        resetVariables();
+    }
+
+    public void start() {
+        running = true;
+        runThread = null;
+        run();
+    }
+
+
+    public void resetVariables() {
+        firstPos = null;
+        finalPos = null;
+        currentPos = null;
         running = false;
         runThread = null;
-    }
-    public void start(){
-        running=true;
-        runThread = null;
+        dismounted = false;
+        remounted = false;
+        yawChanged1 = false;
+        yawChanged2 = false;
+        pressed=false;
     }
 
     private void setPressed(KeyBinding key, boolean pressed) {
