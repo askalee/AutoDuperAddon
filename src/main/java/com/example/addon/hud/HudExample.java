@@ -8,6 +8,7 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
+import static net.minecraft.stat.StatFormatter.DECIMAL_FORMAT;
 
 public class HudExample extends HudElement {
     public static final HudElementInfo<HudExample> INFO = new HudElementInfo<>(Main_Addon.HUD_GROUP, "AutoDuper", "HUD element for AutoDuper 6b6t addon.", HudExample::new);
@@ -18,15 +19,19 @@ public class HudExample extends HudElement {
 
     @Override
     public void render(HudRenderer renderer) {
-        String firstPos="Starting position: "+ DonkeyRider.getFirstPos().replace("(","").replace(")","");
-        String finalPos="Final position: "+ DonkeyRider.getFinalPos().replace("(","").replace(")","");
-        int firstPosWidth = mc.textRenderer.getWidth(firstPos);
-        int finalPosWidth = mc.textRenderer.getWidth(finalPos);
-        int size = Math.max(firstPosWidth, finalPosWidth);
-        setSize(size + 5, renderer.textHeight(true)*2+2);
-        renderer.text(firstPos, x, y, Color.WHITE, true);
-        renderer.text(finalPos, x + 1, y + renderer.textHeight(), Color.WHITE, true);
-
-
+        if (mc.player!=null) {
+            int size;
+            String firstPosText="Starting position: "+ DonkeyRider.getFirstPos().replace("(","").replace(")","");
+            String finalPosText="Final position: "+ DonkeyRider.getFinalPos().replace("(","").replace(")","");
+            if(DonkeyRider.getFirstPosVec() == null) {
+                size = mc.textRenderer.getWidth(finalPosText);
+            } else {
+                renderer.text("Distance from starting position: " + DECIMAL_FORMAT.format(mc.player.getPos().distanceTo(DonkeyRider.getFirstPosVec())) + " blocks", x + 1, y + renderer.textHeight() * 2, Color.WHITE, true);
+                size = mc.textRenderer.getWidth("Distance from starting position: " + DECIMAL_FORMAT.format(mc.player.getPos().distanceTo(DonkeyRider.getFirstPosVec())) + " blocks");
+            }
+            setSize(size + 5, renderer.textHeight(true) * 3 + 2);
+            renderer.text(firstPosText, x, y, Color.WHITE, true);
+            renderer.text(finalPosText, x + 1, y + renderer.textHeight(), Color.WHITE, true);
+        }
     }
 }

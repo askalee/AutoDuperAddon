@@ -2,6 +2,7 @@ package com.example.addon;
 
 import com.example.addon.commands.CommandExample;
 import com.example.addon.hud.HudExample;
+import com.example.addon.modules.DonkeyDuper;
 import com.example.addon.modules.DonkeyRider;
 import com.mojang.logging.LogUtils;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -24,6 +25,7 @@ public class Main_Addon extends MeteorAddon {
 
         // Modules
         Modules.get().add(new DonkeyRider());
+
 
         // Commands
         Commands.add(new CommandExample());
