@@ -26,12 +26,14 @@ public class HudExample extends HudElement {
             if(DonkeyRider.getFirstPosVec() == null) {
                 size = mc.textRenderer.getWidth(finalPosText);
             } else {
-                renderer.text("Distance from starting position: " + DECIMAL_FORMAT.format(mc.player.getPos().distanceTo(DonkeyRider.getFirstPosVec())) + " blocks", x + 1, y + renderer.textHeight() * 2, Color.WHITE, true);
+                renderer.text("Distance from starting position: " + DECIMAL_FORMAT.format(mc.player.getPos().distanceTo(DonkeyRider.getFirstPosVec())) + " blocks", x + 1, y + renderer.textHeight() * 3, Color.WHITE, true);
                 size = mc.textRenderer.getWidth("Distance from starting position: " + DECIMAL_FORMAT.format(mc.player.getPos().distanceTo(DonkeyRider.getFirstPosVec())) + " blocks");
             }
-            setSize(size + 5, renderer.textHeight(true) * 3 + 2);
-            renderer.text(firstPosText, x, y, Color.WHITE, true);
-            renderer.text(finalPosText, x + 1, y + renderer.textHeight(), Color.WHITE, true);
+            setSize(size + 5, renderer.textHeight(true) * 4 + 2);
+            renderer.text(firstPosText, x, y + renderer.textHeight(), Color.WHITE, true);
+            renderer.text(finalPosText, x + 1, y + renderer.textHeight() * 2, Color.WHITE, true);
+            renderer.text(" Imperials On Top!!! ", x + 1, y, Color.WHITE, true);
+
         }
     }
 }

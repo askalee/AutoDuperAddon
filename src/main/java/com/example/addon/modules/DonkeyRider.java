@@ -186,10 +186,12 @@ public class DonkeyRider extends Module {
                                             player.dismountVehicle();
                                             ChatUtils.sendPlayerMsg(".dismount");
                                             mc.player.sendMessage(Text.of("Dismounted Succesfully"), false);
+                                            setPressed(mc.options.forwardKey, true);
                                             dismounted = true;
                                             remounted = false;
                                             yawChanged1 = false;
                                             yawChanged2 = false;
+                                            for(int i=0;i<200;i++){};
                                             setPressed(mc.options.forwardKey, false);
                                         }
                                     }

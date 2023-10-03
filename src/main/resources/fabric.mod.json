@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "autoduper",
   "version": "${version}",
-  "name": "6b6t AutoDuper",
-  "description": "An AutoDuper.",
+  "name": "AutoDuper",
+  "description": "An AutoDuper for public dupes",
   "authors": [
     "tanishisherewith"
   ],
