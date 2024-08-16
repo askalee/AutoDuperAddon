@@ -8,7 +8,7 @@
     "tanishisherewith"
   ],
   "contact": {
-    "repo": "https://discord.gg/qmfR5QXUPa"
+    "repo": "https://github.com/tanishisherewithhh/AutoDuperAddon"
   },
   "icon": "assets/template/icon.png",
   "environment": "client",
@@ -18,13 +18,13 @@
     ]
   },
   "mixins": [
-    "addon-template.mixins.json"
+    "autoduperaddon.mixins.json"
   ],
   "custom": {
     "meteor-client:color": "225,25,25"
   },
   "depends": {
-    "java": ">=17",
+    "java": ">=21",
     "minecraft": ">=${mc_version}",
     "meteor-client": "*"
   }

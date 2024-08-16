@@ -1,12 +1,11 @@
 package com.example.addon;
 
-import com.example.addon.commands.CommandExample;
 import com.example.addon.hud.HudExample;
 import com.example.addon.modules.DonkeyRider;
 import com.example.addon.modules.ItemFrameDupe;
+import com.example.addon.modules.LlamaDupe2bfr;
 import com.mojang.logging.LogUtils;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
-import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.systems.modules.Category;
@@ -25,10 +24,8 @@ public class Main_Addon extends MeteorAddon {
         // Modules
         Modules.get().add(new DonkeyRider());
         Modules.get().add(new ItemFrameDupe());
+        Modules.get().add(new LlamaDupe2bfr());
 
-
-        // Commands
-        Commands.add(new CommandExample());
 
         // HUD
         Hud.get().register(HudExample.INFO);
