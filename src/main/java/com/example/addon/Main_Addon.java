@@ -26,7 +26,6 @@ public class Main_Addon extends MeteorAddon {
         Modules.get().add(new ItemFrameDupe());
         Modules.get().add(new LlamaDupe2bfr());
 
-
         // HUD
         Hud.get().register(HudExample.INFO);
     }

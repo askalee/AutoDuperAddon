@@ -11,19 +11,17 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static net.minecraft.stat.StatFormatter.DECIMAL_FORMAT;
 
 public class HudExample extends HudElement {
-    public static final HudElementInfo<HudExample> INFO = new HudElementInfo<>(Main_Addon.HUD_GROUP, "AutoDuper", "HUD element for AutoDuper 6b6t addon.", HudExample::new);
-
     public HudExample() {
         super(INFO);
-    }
+    }    public static final HudElementInfo<HudExample> INFO = new HudElementInfo<>(Main_Addon.HUD_GROUP, "AutoDuper", "HUD element for AutoDuper 6b6t addon.", HudExample::new);
 
     @Override
     public void render(HudRenderer renderer) {
-        if (mc.player!=null) {
+        if (mc.player != null) {
             int size;
-            String firstPosText="Starting position: "+ DonkeyRider.getFirstPos().replace("(","").replace(")","");
-            String finalPosText="Final position: "+ DonkeyRider.getFinalPos().replace("(","").replace(")","");
-            if(DonkeyRider.getFirstPosVec() == null) {
+            String firstPosText = "Starting position: " + DonkeyRider.getFirstPos().replace("(", "").replace(")", "");
+            String finalPosText = "Final position: " + DonkeyRider.getFinalPos().replace("(", "").replace(")", "");
+            if (DonkeyRider.getFirstPosVec() == null) {
                 size = mc.textRenderer.getWidth(finalPosText);
             } else {
                 renderer.text("Distance from starting position: " + DECIMAL_FORMAT.format(mc.player.getPos().distanceTo(DonkeyRider.getFirstPosVec())) + " blocks", x + 1, y + renderer.textHeight() * 3, Color.WHITE, true);
@@ -33,7 +31,8 @@ public class HudExample extends HudElement {
             renderer.text(firstPosText, x, y + renderer.textHeight(), Color.WHITE, true);
             renderer.text(finalPosText, x + 1, y + renderer.textHeight() * 2, Color.WHITE, true);
             renderer.text(" Imperials On Top!!! ", x + 1, y, Color.WHITE, true);
-
         }
     }
+
+
 }

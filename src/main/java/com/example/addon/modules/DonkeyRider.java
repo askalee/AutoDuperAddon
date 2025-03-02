@@ -133,118 +133,117 @@ public class DonkeyRider extends Module {
         if (runThread == null) {
             runThread = new Thread(() -> {
                 while (running) {
-                    if(mc.player==null && this.isActive()){
+                    if (mc.player == null && this.isActive()) {
                         this.toggle();
                     }
                     YAW = yaw.get();
                     PlayerEntity player = mc.player;
-                    if (player != null) {
-                        if (player.getPos() != null) {
-                            if (player.hasVehicle() && player.getVehicle() instanceof DonkeyEntity) {
-                                currentPos = player.getPos();
-                                //  mc.player.sendMessage(Text.of("Distance from starting position: " + DECIMAL_FORMAT.format(currentPos.distanceTo(firstPos)) + " blocks"), true);
-                                if (currentPos != null && firstPos != null) {
-                                    if (currentPos != null && currentPos.distanceTo(firstPos) >= distance.get() + 1 && !yawChanged1) {
-                                        setPressed(mc.options.forwardKey, false);
-                                        String AntiSpamText = "Reached!!! " + RandomStringUtils.randomAlphanumeric(11);
-                                        try {
-                                            ChatUtils.sendPlayerMsg(AntiSpamText);
-                                            long startTime = System.currentTimeMillis();
-                                            long endTime = startTime + waitBeforeMoving.get();
-                                            while (System.currentTimeMillis() < endTime) {
-                                                double timeLeft = (endTime - System.currentTimeMillis()) / 1000.0;
-                                                mc.player.sendMessage(Text.of("Stopping for " + String.format("%.2f", timeLeft) + "s " + "because reached " + distance.get() + " blocks"), true);
-                                                Thread.sleep(10);
-                                            }
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                        if (yaw.get() >= 0) {
-                                            yaw.set(yaw.get() - 180);
-                                        } else {
-                                            yaw.set(yaw.get() + 180);
-                                        }
-                                        YAW = yaw.get();
-                                        finalPos = firstPos;
-                                        firstPos = player.getPos();
-                                        yaw.set(YAW);
-                                        yawChanged1 = true;
-                                        yawChanged2 = false;
-                                        dismounted = false;
-                                    }
-                                    player.setYaw((float) YAW);
-                                    if (running) {
-                                        if (shouldPause())
-                                            setPressed(mc.options.forwardKey, false);
-                                        else
-                                            setPressed(mc.options.forwardKey, isActive());
-                                    }
-                                    if (finalPos != null) {
-                                        double pos = currentPos.distanceTo(finalPos);
-                                        if (pos <= 1.5f && !dismounted) {
-                                            setPressed(mc.options.forwardKey, false);
-                                            player.dismountVehicle();
-                                            ChatUtils.sendPlayerMsg(".dismount");
-                                            mc.player.sendMessage(Text.of("Dismounted Succesfully"), false);
-                                            setPressed(mc.options.forwardKey, true);
-                                            dismounted = true;
-                                            remounted = false;
-                                            yawChanged1 = false;
-                                            yawChanged2 = false;
-                                            for(int i=0;i<200;i++){};
-                                            setPressed(mc.options.forwardKey, false);
-                                        }
-                                    }
-                                }
-                            } else {
+                    if (player == null || player.getPos() == null) return;
+                    if (player.hasVehicle() && player.getVehicle() instanceof DonkeyEntity) {
+                        currentPos = player.getPos();
+                        //  mc.player.sendMessage(Text.of("Distance from starting position: " + DECIMAL_FORMAT.format(currentPos.distanceTo(firstPos)) + " blocks"), true);
+                        if (currentPos != null && firstPos != null) {
+                            if (currentPos != null && currentPos.distanceTo(firstPos) >= distance.get() + 1 && !yawChanged1) {
                                 setPressed(mc.options.forwardKey, false);
-
-                                if (dismounted && remount.get()) {
-                                    List<DonkeyEntity> donkeys = player.getWorld().getEntitiesByClass(DonkeyEntity.class, player.getBoundingBox().expand(5), Entity -> !Entity.hasControllingPassenger());
-                                    if (!donkeys.isEmpty() && !player.hasVehicle() && !remounted && !yawChanged2) {
-                                        mc.player.sendMessage(Text.of("Attempting to remount"), false);
-                                        try {
-                                            long startTime = System.currentTimeMillis();
-                                            long endTime = startTime + RemountTime.get()*2;
-                                            while (System.currentTimeMillis() < endTime) {
-                                                double timeLeft = (endTime - System.currentTimeMillis()) / 1000.0;
-                                                mc.player.sendMessage(Text.of("Stopping for " + String.format("%.2f", timeLeft) + "s " + "because dismounted"), true);
-                                                Thread.sleep(10);
-                                            }
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                        if (player.distanceTo(donkeys.get(0)) > 4) {
-                                            double xPos = Double.parseDouble(DECIMAL_FORMAT.format(donkeys.get(0).getBlockPos().getX()));
-                                            double zPos = Double.parseDouble(DECIMAL_FORMAT.format(donkeys.get(0).getBlockPos().getZ()));
-                                            double yPos = Double.parseDouble(DECIMAL_FORMAT.format(donkeys.get(0).getBlockPos().getY()));
-                                            ChatUtils.sendPlayerMsg("#goto " + (xPos - 1) + " " + yPos + " " + (zPos - 1));
-                                            try {
-                                                Thread.sleep((long) (3000));
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
-                                            ChatUtils.sendPlayerMsg("#stop");
-                                        }
-                                        // player.startRiding(donkeys.get(0));
-                                        //while (!player.hasVehicle() && player.distanceTo(donkeys.get(0))<3.5 && dismounted && !remounted) {
-                                        mc.interactionManager.interactEntity(player, donkeys.get(0), Hand.MAIN_HAND);
-                                        //}
-                                        dismounted = false;
-                                        finalPos = null;
-                                        if (yaw.get() >= 0) {
-                                            yaw.set(yaw.get() - 180);
-                                        } else {
-                                            yaw.set(yaw.get() + 180);
-                                        }
-                                        YAW = yaw.get();
-                                        yawChanged2 = true;
-                                        remounted = true;
-                                        yawChanged1 = false;
-                                        firstPos = player.getPos();
-                                        mc.player.sendMessage(Text.of("Remount Successfull"), false);
+                                String AntiSpamText = "Reached!!! " + RandomStringUtils.randomAlphanumeric(11);
+                                try {
+                                    ChatUtils.sendPlayerMsg(AntiSpamText);
+                                    long startTime = System.currentTimeMillis();
+                                    long endTime = startTime + waitBeforeMoving.get();
+                                    while (System.currentTimeMillis() < endTime) {
+                                        double timeLeft = (endTime - System.currentTimeMillis()) / 1000.0;
+                                        mc.player.sendMessage(Text.of("Stopping for " + String.format("%.2f", timeLeft) + "s " + "because reached " + distance.get() + " blocks"), true);
+                                        Thread.sleep(10);
                                     }
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
                                 }
+                                if (yaw.get() >= 0) {
+                                    yaw.set(yaw.get() - 180);
+                                } else {
+                                    yaw.set(yaw.get() + 180);
+                                }
+                                //bad var names. :(
+                                YAW = yaw.get();
+                                finalPos = firstPos;
+                                firstPos = player.getPos();
+                                yaw.set(YAW);
+                                yawChanged1 = true;
+                                yawChanged2 = false;
+                                dismounted = false;
+                            }
+                            player.setYaw((float) YAW);
+                            if (running) {
+                                if (shouldPause())
+                                    setPressed(mc.options.forwardKey, false);
+                                else
+                                    setPressed(mc.options.forwardKey, isActive());
+                            }
+                            if (finalPos != null) {
+                                double pos = currentPos.distanceTo(finalPos);
+                                if (pos <= 1.5f && !dismounted) {
+                                    setPressed(mc.options.forwardKey, false);
+                                    player.dismountVehicle();
+                                    ChatUtils.sendPlayerMsg(".dismount");
+                                    mc.player.sendMessage(Text.of("Dismounted Succesfully"), false);
+                                    setPressed(mc.options.forwardKey, true);
+                                    dismounted = true;
+                                    remounted = false;
+                                    yawChanged1 = false;
+                                    yawChanged2 = false;
+                                    for (int i = 0; i < 200; i++) {
+                                    }
+                                    setPressed(mc.options.forwardKey, false);
+                                }
+                            }
+                        }
+                    } else {
+                        setPressed(mc.options.forwardKey, false);
+
+                        if (dismounted && remount.get()) {
+                            List<DonkeyEntity> donkeys = player.getWorld().getEntitiesByClass(DonkeyEntity.class, player.getBoundingBox().expand(5), Entity -> !Entity.hasControllingPassenger());
+                            if (!donkeys.isEmpty() && !player.hasVehicle() && !remounted && !yawChanged2) {
+                                mc.player.sendMessage(Text.of("Attempting to remount"), false);
+                                try {
+                                    long startTime = System.currentTimeMillis();
+                                    long endTime = startTime + RemountTime.get() * 2;
+                                    while (System.currentTimeMillis() < endTime) {
+                                        double timeLeft = (endTime - System.currentTimeMillis()) / 1000.0;
+                                        mc.player.sendMessage(Text.of("Stopping for " + String.format("%.2f", timeLeft) + "s " + "because dismounted"), true);
+                                        Thread.sleep(10);
+                                    }
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                if (player.distanceTo(donkeys.get(0)) > 4) {
+                                    double xPos = Double.parseDouble(DECIMAL_FORMAT.format(donkeys.get(0).getBlockPos().getX()));
+                                    double zPos = Double.parseDouble(DECIMAL_FORMAT.format(donkeys.get(0).getBlockPos().getZ()));
+                                    double yPos = Double.parseDouble(DECIMAL_FORMAT.format(donkeys.get(0).getBlockPos().getY()));
+                                    ChatUtils.sendPlayerMsg("#goto " + (xPos - 1) + " " + yPos + " " + (zPos - 1));
+                                    try {
+                                        Thread.sleep((long) (3000));
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    ChatUtils.sendPlayerMsg("#stop");
+                                }
+                                // player.startRiding(donkeys.get(0));
+                                //while (!player.hasVehicle() && player.distanceTo(donkeys.get(0))<3.5 && dismounted && !remounted) {
+                                mc.interactionManager.interactEntity(player, donkeys.get(0), Hand.MAIN_HAND);
+                                //}
+                                dismounted = false;
+                                finalPos = null;
+                                if (yaw.get() >= 0) {
+                                    yaw.set(yaw.get() - 180);
+                                } else {
+                                    yaw.set(yaw.get() + 180);
+                                }
+                                YAW = yaw.get();
+                                yawChanged2 = true;
+                                remounted = true;
+                                yawChanged1 = false;
+                                firstPos = player.getPos();
+                                mc.player.sendMessage(Text.of("Remount Successfull"), false);
                             }
                         }
                     }
