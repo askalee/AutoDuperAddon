@@ -77,7 +77,7 @@ public class ItemFrameDupe extends Module {
     private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
         .name("place-delay")
         .description("Delay between placement cycles in ticks.")
-        .defaultValue(1)
+        .defaultValue(2)
         .min(0)
         .sliderMax(10)
         .build()
@@ -283,7 +283,7 @@ public class ItemFrameDupe extends Module {
     private void onRender3D(Render3DEvent event) {
         if (renderPlacement.get()) {
             for (BlockPos pos : placementQueue) {
-                event.renderer.box(mc.world.getBlockState(pos).getCollisionShape(mc.world,pos).getBoundingBox(), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                event.renderer.box(pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
             }
         }
     }

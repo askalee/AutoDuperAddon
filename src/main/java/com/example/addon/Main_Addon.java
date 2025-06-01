@@ -1,14 +1,11 @@
 package com.example.addon;
 
-import com.example.addon.hud.HudExample;
 import com.example.addon.modules.AutoIgnore;
 import com.example.addon.modules.DonkeyRider;
 import com.example.addon.modules.ItemFrameDupe;
 import com.example.addon.modules.LlamaDupe2bfr;
 import com.mojang.logging.LogUtils;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
-import meteordevelopment.meteorclient.systems.hud.Hud;
-import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import org.slf4j.Logger;
@@ -16,7 +13,6 @@ import org.slf4j.Logger;
 public class Main_Addon extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
     public static final Category CATEGORY = new Category("Duper");
-    public static final HudGroup HUD_GROUP = new HudGroup("AutoDuper");
 
     @Override
     public void onInitialize() {
@@ -27,9 +23,6 @@ public class Main_Addon extends MeteorAddon {
         Modules.get().add(new ItemFrameDupe());
         Modules.get().add(new LlamaDupe2bfr());
         Modules.get().add(new AutoIgnore());
-
-        // HUD
-        Hud.get().register(HudExample.INFO);
     }
 
     @Override
