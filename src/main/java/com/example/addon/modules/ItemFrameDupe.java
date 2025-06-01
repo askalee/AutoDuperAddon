@@ -25,7 +25,6 @@ import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
 
 public class ItemFrameDupe extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -36,157 +35,154 @@ public class ItemFrameDupe extends Module {
     private final SettingGroup sgAutoDisable = settings.createGroup("Auto Disable");
 
     private final Setting<Integer> distance = sgGeneral.add(new IntSetting.Builder()
-        .name("distance")
-        .description("Max distance to search for placement spots.")
-        .defaultValue(3)
-        .min(1)
-        .sliderMax(6)
-        .build()
+            .name("distance")
+            .description("Max distance to search for placement spots.")
+            .defaultValue(3)
+            .min(1)
+            .sliderMax(6)
+            .build()
     );
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-        .name("rotate-player")
-        .description("Rotate Player when placing.")
-        .defaultValue(true)
-        .build()
+            .name("rotate-player")
+            .description("Rotate Player when placing.")
+            .defaultValue(true)
+            .build()
     );
     private final Setting<Boolean> rotateItem = sgGeneral.add(new BoolSetting.Builder()
-        .name("rotate-item")
-        .description("Keep rotating item frame.")
-        .defaultValue(true)
-        .build()
+            .name("rotate-item")
+            .description("Keep rotating item frame.")
+            .defaultValue(true)
+            .build()
     );
     private final Setting<Boolean> swapBack = sgGeneral.add(new BoolSetting.Builder()
-        .name("swap-back")
-        .description("Swap back to previous item after placing.")
-        .defaultValue(true)
-        .build()
+            .name("swap-back")
+            .description("Swap back to previous item after placing.")
+            .defaultValue(true)
+            .build()
     );
     private final Setting<Boolean> tpsBasedDelay = sgGeneral.add(new BoolSetting.Builder()
-        .name("tps-based-delay")
-        .description("Adjust delays based on TPS and ping.")
-        .defaultValue(false)
-        .build()
+            .name("tps-based-delay")
+            .description("Adjust delays based on TPS and ping.")
+            .defaultValue(false)
+            .build()
     );
 
     private final Setting<Boolean> placeItemFrame = sgPlace.add(new BoolSetting.Builder()
-        .name("place-item-frame")
-        .description("Place item frames if needed.")
-        .defaultValue(true)
-        .build()
+            .name("place-item-frame")
+            .description("Place item frames if needed.")
+            .defaultValue(true)
+            .build()
     );
     private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
-        .name("place-delay")
-        .description("Delay between placement cycles in ticks.")
-        .defaultValue(2)
-        .min(0)
-        .sliderMax(10)
-        .build()
+            .name("place-delay")
+            .description("Delay between placement cycles in ticks.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(10)
+            .build()
     );
     private final Setting<Integer> maxPlacesPerTick = sgPlace.add(new IntSetting.Builder()
-        .name("max-places-per-tick")
-        .description("Max item frames to place per tick.")
-        .defaultValue(1)
-        .min(1)
-        .sliderMax(8)
-        .build()
+            .name("max-places-per-tick")
+            .description("Max item frames to place per tick.")
+            .defaultValue(2)
+            .min(1)
+            .sliderMax(8)
+            .build()
     );
     private final Setting<BlockPos> preferredPosition = sgPlace.add(new BlockPosSetting.Builder()
-        .name("preferred-position")
-        .description("Preferred position for placing item frames.")
-        .defaultValue(BlockPos.ORIGIN)
-        .build()
+            .name("preferred-position")
+            .description("Preferred position for placing item frames.")
+            .defaultValue(BlockPos.ORIGIN)
+            .build()
     );
 
     private final Setting<Boolean> multiBreak = sgBreak.add(new BoolSetting.Builder()
-        .name("multi-break")
-        .description("Break multiple item frames per tick.")
-        .defaultValue(false)
-        .build()
+            .name("multi-break")
+            .description("Break multiple item frames per tick.")
+            .defaultValue(true)
+            .build()
     );
     private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
-        .name("break-delay")
-        .description("Delay between breaking item frames in ticks.")
-        .defaultValue(2)
-        .min(0)
-        .sliderMax(60)
-        .build()
+            .name("break-delay")
+            .description("Delay between breaking item frames in ticks.")
+            .defaultValue(1)
+            .min(0)
+            .sliderMax(60)
+            .build()
     );
     private final Setting<Integer> maxBreaksPerTick = sgBreak.add(new IntSetting.Builder()
-        .name("max-breaks-per-tick")
-        .description("Max item frames to break per tick.")
-        .defaultValue(1)
-        .min(1)
-        .sliderMax(8)
-        .build()
+            .name("max-breaks-per-tick")
+            .description("Max item frames to break per tick.")
+            .defaultValue(1)
+            .min(1)
+            .sliderMax(8)
+            .build()
     );
 
     private final Setting<Boolean> autoScroll = sgAutoScroll.add(new BoolSetting.Builder()
-        .name("auto-scroll-hotbar")
-        .description("Scroll hotbar to dupe items.")
-        .defaultValue(false)
-        .build()
+            .name("auto-scroll-hotbar")
+            .description("Scroll hotbar to dupe items.")
+            .defaultValue(false)
+            .build()
     );
     private final Setting<Integer> scrollDelay = sgAutoScroll.add(new IntSetting.Builder()
-        .name("scroll-delay")
-        .description("Delay between hotbar scrolls in ticks.")
-        .defaultValue(3)
-        .min(0)
-        .sliderMax(10)
-        .build()
+            .name("scroll-delay")
+            .description("Delay between hotbar scrolls in ticks.")
+            .defaultValue(3)
+            .min(0)
+            .sliderMax(10)
+            .build()
     );
 
     private final Setting<Boolean> renderPlacement = sgRender.add(new BoolSetting.Builder()
-        .name("render-placement")
-        .description("Render placement positions.")
-        .defaultValue(true)
-        .build()
+            .name("render-placement")
+            .description("Render placement positions.")
+            .defaultValue(true)
+            .build()
     );
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-        .name("shape-mode")
-        .description("Render style for placement positions.")
-        .defaultValue(ShapeMode.Lines)
-        .build()
+            .name("shape-mode")
+            .description("Render style for placement positions.")
+            .defaultValue(ShapeMode.Lines)
+            .build()
     );
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-        .name("side-color")
-        .description("Side color of placement render.")
-        .defaultValue(new SettingColor(255, 255, 255, 75))
-        .build()
+            .name("side-color")
+            .description("Side color of placement render.")
+            .defaultValue(new SettingColor(255, 255, 255, 75))
+            .build()
     );
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-        .name("line-color")
-        .description("Line color of placement render.")
-        .defaultValue(new SettingColor(255, 255, 255, 255))
-        .build()
+            .name("line-color")
+            .description("Line color of placement render.")
+            .defaultValue(new SettingColor(255, 255, 255, 255))
+            .build()
     );
 
     private final Setting<Boolean> autoDisable = sgAutoDisable.add(new BoolSetting.Builder()
-        .name("auto-disable")
-        .description("Disable after set dupes or inventory depletion.")
-        .defaultValue(false)
-        .build()
+            .name("auto-disable")
+            .description("Disable after set dupes or inventory depletion.")
+            .defaultValue(false)
+            .build()
     );
     private final Setting<Integer> maxDupes = sgAutoDisable.add(new IntSetting.Builder()
-        .name("max-dupes")
-        .description("Max successful dupes before disabling.")
-        .defaultValue(100)
-        .min(1)
-        .sliderMax(1000)
-        .visible(autoDisable::get)
-        .build()
+            .name("max-dupes")
+            .description("Max successful dupes before disabling.")
+            .defaultValue(100)
+            .min(1)
+            .sliderMax(1000)
+            .visible(autoDisable::get)
+            .build()
     );
     private final Setting<Boolean> disableOnEmpty = sgAutoDisable.add(new BoolSetting.Builder()
-        .name("disable-on-empty")
-        .description("Disable when no item frames left.")
-        .defaultValue(true)
-        .visible(autoDisable::get)
-        .build()
+            .name("disable-on-empty")
+            .description("Disable when no item frames left.")
+            .defaultValue(true)
+            .visible(autoDisable::get)
+            .build()
     );
 
     private int placeTimer, autoScrollTimer, breakTimer, dupeCount;
-    private final List<BlockPos> placementPositions = new ArrayList<>();
-    private final PriorityQueue<BlockPos> placementQueue = new PriorityQueue<>((a, b) ->
-        Double.compare(mc.player.getBlockPos().getSquaredDistance(a), mc.player.getBlockPos().getSquaredDistance(b)));
 
     public ItemFrameDupe() {
         super(Main_Addon.CATEGORY, "ItemFrameDupe", "Places and dupes item frames efficiently.");
@@ -195,13 +191,10 @@ public class ItemFrameDupe extends Module {
     @Override
     public void onActivate() {
         placeTimer = autoScrollTimer = breakTimer = dupeCount = 0;
-        updatePlacementPositions();
     }
 
     @Override
     public void onDeactivate() {
-        placementPositions.clear();
-        placementQueue.clear();
         ChatUtils.infoPrefix("Dupe", "Duped %d items", dupeCount);
         dupeCount = 0;
     }
@@ -219,7 +212,7 @@ public class ItemFrameDupe extends Module {
             autoScrollTimer--;
         }
 
-        Box box = new Box(mc.player.getPos().add(-3, -3, -3), mc.player.getPos().add(3, 3, 3));
+        Box box = new Box(mc.player.getPos().add(-distance.get(), -distance.get(), -distance.get()), mc.player.getPos().add(distance.get(), distance.get(), distance.get()));
         List<ItemFrameEntity> itemFrames = mc.world.getEntitiesByClass(ItemFrameEntity.class, box, e -> true);
         int existingFrames = itemFrames.size();
 
@@ -237,8 +230,9 @@ public class ItemFrameDupe extends Module {
 
             int toPlace = maxPlacesPerTick.get() - existingFrames;
             int placed = 0;
-            while (!placementQueue.isEmpty() && placed < toPlace) {
-                BlockPos pos = placementQueue.poll();
+            List<BlockPos> positions = getPlaceablePositions();
+            for (BlockPos pos : positions) {
+                if (placed >= toPlace) break;
                 if (BlockUtils.canPlace(pos, true)) {
                     if (BlockUtils.place(pos, itemResult, rotate.get(), 50, true, false, swapBack.get())) {
                         placed++;
@@ -282,50 +276,40 @@ public class ItemFrameDupe extends Module {
     @EventHandler
     private void onRender3D(Render3DEvent event) {
         if (renderPlacement.get()) {
-            for (BlockPos pos : placementQueue) {
+            for (BlockPos pos : getPlaceablePositions()) {
                 event.renderer.box(pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
             }
         }
     }
 
-    private void updatePlacementPositions() {
-        placementPositions.clear();
-        placementQueue.clear();
+    private List<BlockPos> getPlaceablePositions() {
+        List<BlockPos> positions = new ArrayList<>();
+        BlockPos center = mc.player.getBlockPos();
+        int radius = distance.get();
+        int radSq = radius * radius;
+        Vec3d lookDir = mc.player.getRotationVec(1.0F).normalize();
 
         if (!preferredPosition.get().equals(BlockPos.ORIGIN)) {
             if (BlockUtils.canPlace(preferredPosition.get(), true)) {
-                placementPositions.add(preferredPosition.get());
-                placementQueue.add(preferredPosition.get());
-            } else {
-                ChatUtils.error("Cannot place at preferred position.");
+                positions.add(preferredPosition.get());
             }
-        } else {
-            Vec3d lookDir = mc.player.getRotationVec(1.0F).normalize();
-            List<BlockPos> positions = getForwardSphere(mc.player.getBlockPos(), distance.get(), lookDir);
-            for (BlockPos pos : positions) {
-                if (BlockUtils.canPlace(pos, true)) {
-                    placementPositions.add(pos);
-                    placementQueue.add(pos);
-                }
-            }
+            return positions;
         }
-    }
 
-    private List<BlockPos> getForwardSphere(BlockPos center, int radius, Vec3d lookDir) {
-        List<BlockPos> positions = new ArrayList<>();
-        int radSq = radius * radius;
         for (int x = -radius; x <= radius; x++) {
             for (int y = -radius; y <= radius; y++) {
                 for (int z = -radius; z <= radius; z++) {
                     BlockPos pos = center.add(x, y, z);
                     if (center.getSquaredDistance(pos) > radSq) continue;
                     Vec3d toPos = new Vec3d(pos.getX() - center.getX(), pos.getY() - center.getY(), pos.getZ() - center.getZ()).normalize();
-                    if (lookDir.dotProduct(toPos) > 0) {
+                    if (lookDir.dotProduct(toPos) <= 0) continue;
+                    if (BlockUtils.canPlace(pos, true)) {
                         positions.add(pos);
                     }
                 }
             }
         }
+        positions.sort((a, b) -> Double.compare(mc.player.getBlockPos().getSquaredDistance(a), mc.player.getBlockPos().getSquaredDistance(b)));
         return positions;
     }
 
