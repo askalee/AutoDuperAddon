@@ -30,9 +30,9 @@ public class AutoIgnore extends Module {
         .build()
     );
 
-    private final Setting<List<String>> exceptionWords = sgGeneral.add(new StringListSetting.Builder()
-        .name("exception-words")
-        .description("Words in player names to exclude from ignore command.")
+    private final Setting<List<String>> exceptionPlayers = sgGeneral.add(new StringListSetting.Builder()
+        .name("exception-players")
+        .description("Players who should not be ignored")
         .defaultValue(new ArrayList<>())
         .build()
     );
@@ -94,8 +94,8 @@ public class AutoIgnore extends Module {
             if (ignoredPlayers.contains(name)) continue;
 
             boolean isException = false;
-            for (String exception : exceptionWords.get()) {
-                if (name.toLowerCase().contains(exception.toLowerCase())) {
+            for (String exception : exceptionPlayers.get()) {
+                if (name.equalsIgnoreCase(exception)) {
                     isException = true;
                     break;
                 }
